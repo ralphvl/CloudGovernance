@@ -1,0 +1,72 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.4.1008.15138",
+      "templateHash": "7164174393691802876"
+    }
+  },
+  "functions": [],
+  "variables": {
+    "webappname1": "ralphvl-webapp-1",
+    "webappname2": "ralphvl-webapp-2",
+    "webapplocation1": "West Europe",
+    "webapplocation2": "North Europe",
+    "webappnamehosting1": "ralphvl-webapphostingplan-1",
+    "webappnamehosting2": "ralphvl-webapphostingplan-2"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-12-01",
+      "name": "[variables('webappnamehosting1')]",
+      "location": "[variables('webapplocation1')]",
+      "sku": {
+        "name": "F1",
+        "capacity": 1
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('webappname1')]",
+      "location": "[variables('webapplocation1')]",
+      "tags": {
+        "[format('hidden-related:{0}/providers/Microsoft.Web/serverfarms/appServicePlan', resourceGroup().id)]": "Resource"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('webappnamehosting1'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('webappnamehosting1'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-12-01",
+      "name": "[variables('webappnamehosting2')]",
+      "location": "[variables('webapplocation2')]",
+      "sku": {
+        "name": "F1",
+        "capacity": 1
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('webappname2')]",
+      "location": "[variables('webapplocation2')]",
+      "tags": {
+        "[format('hidden-related:{0}/providers/Microsoft.Web/serverfarms/appServicePlan', resourceGroup().id)]": "Resource"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('webappnamehosting2'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('webappnamehosting2'))]"
+      ]
+    }
+  ]
+}
