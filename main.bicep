@@ -137,7 +137,7 @@ resource frontDoor1 'Microsoft.Network/frontDoors@2020-05-01' = {
             '*'
           ]
           routeConfiguration: {
-            @odata.type: '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
+            '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
             backendPool: {
               id: 'string'
             }

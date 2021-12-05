@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1008.15138",
-      "templateHash": "10714061944575630494"
+      "templateHash": "5282163420637333348"
     }
   },
   "functions": [],
@@ -160,10 +160,46 @@
               "patternsToMatch": [
                 "*"
               ],
-              "routeConfiguration": {}
+              "routeConfiguration": {
+                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
+                "backendPool": {
+                  "id": "string"
+                },
+                "cacheConfiguration": {
+                  "cacheDuration": "string",
+                  "dynamicCompression": "string",
+                  "queryParameters": "string",
+                  "queryParameterStripDirective": "string"
+                },
+                "customForwardingPath": "string",
+                "forwardingProtocol": "string"
+              }
             }
           }
         ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies",
+      "apiVersion": "2020-11-01",
+      "name": "name",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "policySettings": {
+          "requestBodyCheck": true,
+          "maxRequestBodySizeInKb": "maxRequestBodySizeInKb",
+          "fileUploadLimitInMb": "fileUploadLimitInMb",
+          "state": "Enabled",
+          "mode": "Detection"
+        },
+        "managedRules": {
+          "managedRuleSets": [
+            {
+              "ruleSetType": "ruleSetType",
+              "ruleSetVersion": "ruleSetVersion"
+            }
+          ]
+        }
       }
     }
   ]
