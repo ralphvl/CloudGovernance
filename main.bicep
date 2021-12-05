@@ -123,7 +123,6 @@ resource frontDoor1 'Microsoft.Network/frontDoors@2020-05-01' = {
       {
         name: 'erbrtsfdbseadffdb'
         properties: {
-          
           acceptedProtocols: [
             'Http'
             'Https'
@@ -138,11 +137,45 @@ resource frontDoor1 'Microsoft.Network/frontDoors@2020-05-01' = {
             '*'
           ]
           routeConfiguration: {
-              
+            @odata.type: '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
+            backendPool: {
+              id: 'string'
+            }
+            cacheConfiguration: {
+              cacheDuration: 'string'
+              dynamicCompression: 'string'
+              queryParameters: 'string'
+              queryParameterStripDirective: 'string'
+            }
+            customForwardingPath: 'string'
+            forwardingProtocol: 'string'
           }
         }
       }
     ]
   }
 }
+
+resource applicationGatewayFirewall 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2020-11-01' = {
+  name: 'name'
+  location: resourceGroup().location
+  properties: {
+    policySettings: {
+      requestBodyCheck: true
+      maxRequestBodySizeInKb: 'maxRequestBodySizeInKb'
+      fileUploadLimitInMb: 'fileUploadLimitInMb'
+      state: 'Enabled'
+      mode: 'Detection'
+    }
+    managedRules: {
+      managedRuleSets: [
+        {
+          ruleSetType: 'ruleSetType'
+          ruleSetVersion: 'ruleSetVersion'
+        }
+      ]
+    }
+  }
+}
+
 
