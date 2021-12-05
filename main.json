@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1008.15138",
-      "templateHash": "7164174393691802876"
+      "templateHash": "10714061944575630494"
     }
   },
   "functions": [],
@@ -15,7 +15,9 @@
     "webapplocation1": "West Europe",
     "webapplocation2": "North Europe",
     "webappnamehosting1": "ralphvl-webapphostingplan-1",
-    "webappnamehosting2": "ralphvl-webapphostingplan-2"
+    "webappnamehosting2": "ralphvl-webapphostingplan-2",
+    "frontdoorname": "ralphvl-frontdoor-1",
+    "frontdoorlocation": "global"
   },
   "resources": [
     {
@@ -67,6 +69,102 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('webappnamehosting2'))]"
       ]
+    },
+    {
+      "type": "Microsoft.Network/frontDoors",
+      "apiVersion": "2020-05-01",
+      "name": "[variables('frontdoorname')]",
+      "location": "[variables('frontdoorlocation')]",
+      "properties": {
+        "backendPools": [
+          {
+            "name": "ralphvl-test-webappfront2.azurefd.net",
+            "properties": {
+              "backends": [
+                {
+                  "address": "ralphvl-webapp-1.azurewebsites.net",
+                  "privateLinkResourceId": null,
+                  "privateLinkLocation": null,
+                  "privateEndpointStatus": null,
+                  "privateLinkApprovalMessage": null,
+                  "enabledState": "Enabled",
+                  "httpPort": 80,
+                  "httpsPort": 443,
+                  "priority": 1,
+                  "weight": 50,
+                  "backendHostHeader": "ralphvl-webapp-1.azurewebsites.net"
+                }
+              ],
+              "healthProbeSettings": {
+                "id": "/subscriptions/847facc0-8b90-4374-a58b-cc375b39646f/resourceGroups/ralphvl-dev-rg-cloudgv-01/providers/Microsoft.Network/frontdoors/ralphvl-frontdoor-1/healthProbeSettings/healthProbeSettings-1638437038422"
+              },
+              "loadBalancingSettings": {
+                "id": "/subscriptions/847facc0-8b90-4374-a58b-cc375b39646f/resourceGroups/ralphvl-dev-rg-cloudgv-01/providers/Microsoft.Network/frontdoors/ralphvl-frontdoor-1/loadBalancingSettings/loadBalancingSettings-1638437038422"
+              }
+            }
+          }
+        ],
+        "backendPoolsSettings": {
+          "enforceCertificateNameCheck": "Enabled",
+          "sendRecvTimeoutSeconds": 30
+        },
+        "enabledState": "Enabled",
+        "friendlyName": "ralphvl-test-webappfront1-azurefd-net",
+        "frontendEndpoints": [
+          {
+            "name": "ralphvl-test-webappfront1-azurefd-net",
+            "properties": {
+              "hostName": "ralphvl-test-webappfront.azurefd.net",
+              "sessionAffinityEnabledState": "Disabled",
+              "sessionAffinityTtlSeconds": 0,
+              "webApplicationFirewallPolicyLink": null
+            }
+          }
+        ],
+        "healthProbeSettings": [
+          {
+            "name": "healthProbeSettings-1638437038422",
+            "properties": {
+              "enabledState": "Enabled",
+              "healthProbeMethod": "Head",
+              "intervalInSeconds": 30,
+              "path": "/",
+              "protocol": "Https"
+            }
+          }
+        ],
+        "loadBalancingSettings": [
+          {
+            "name": "loadBalancingSettings-1638437038422",
+            "properties": {
+              "additionalLatencyMilliseconds": 4,
+              "sampleSize": 2,
+              "successfulSamplesRequired": 0
+            }
+          }
+        ],
+        "routingRules": [
+          {
+            "name": "erbrtsfdbseadffdb",
+            "properties": {
+              "acceptedProtocols": [
+                "Http",
+                "Https"
+              ],
+              "enabledState": "Enabled",
+              "frontendEndpoints": [
+                {
+                  "id": "/subscriptions/847facc0-8b90-4374-a58b-cc375b39646f/resourceGroups/ralphvl-dev-rg-cloudgv-01/providers/Microsoft.Network/frontdoors/ralphdoeteentest/frontendEndpoints/ralphdoeteentest-azurefd-net"
+                }
+              ],
+              "patternsToMatch": [
+                "*"
+              ],
+              "routeConfiguration": {}
+            }
+          }
+        ]
+      }
     }
   ]
 }
