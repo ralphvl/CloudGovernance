@@ -1,15 +1,18 @@
-var webappname1 = 'ralphvl-webapp-1'
-var webappname2 = 'ralphvl-webapp-2'
-var webapplocation1 = 'West Europe'
-var webapplocation2 = 'North Europe'
-var webappnamehosting1 = 'ralphvl-webapphostingplan-1'
-var webappnamehosting2 = 'ralphvl-webapphostingplan-2'
-var frontdoorname = 'ralphvl-frontdoor-1'
-var frontdoorlocation = 'global'
+var webAppName1 = 'cst-webapp-1'
+var webAppName2 = 'cst-webapp-2'
+var webAppLocation1 = 'West Europe'
+var webAppLocation2 = 'North Europe'
+var webAppNameHosting1 = 'cst-webapphostingplan-1'
+var webAppNameHosting2 = 'cst-webapphostingplan-2'
+var frontDoorName = 'cst-frontdoor'
+var frontDoorLocation = 'global'
+var frontDoorBackendPoolAppName = 'cst-backend'
+var loadBalancingSettingsName = 'LB-settings'
+var healthProbe = 'health-prober'
 
 resource appServicePlan1 'Microsoft.Web/serverfarms@2020-12-01' = {
-  name: webappnamehosting1
-  location: webapplocation1
+  name: webAppNameHosting1
+  location: webAppLocation1
   sku: {
     name: 'F1'
     capacity: 1
@@ -17,8 +20,8 @@ resource appServicePlan1 'Microsoft.Web/serverfarms@2020-12-01' = {
 }
 
 resource webApplication1 'Microsoft.Web/sites@2018-11-01' = {
-  name: webappname1
-  location: webapplocation1
+  name: webAppName1
+  location: webAppLocation1
   tags: {
     'hidden-related:${resourceGroup().id}/providers/Microsoft.Web/serverfarms/appServicePlan': 'Resource'
   }
@@ -28,8 +31,8 @@ resource webApplication1 'Microsoft.Web/sites@2018-11-01' = {
 }
 
 resource appServicePlan2 'Microsoft.Web/serverfarms@2020-12-01' = {
-  name: webappnamehosting2
-  location: webapplocation2
+  name: webAppNameHosting2
+  location: webAppLocation2
   sku: {
     name: 'F1'
     capacity: 1
@@ -37,8 +40,8 @@ resource appServicePlan2 'Microsoft.Web/serverfarms@2020-12-01' = {
 }
 
 resource webApplication2 'Microsoft.Web/sites@2018-11-01' = {
-  name: webappname2
-  location: webapplocation2
+  name: webAppName2
+  location: webAppLocation2
   tags: {
     'hidden-related:${resourceGroup().id}/providers/Microsoft.Web/serverfarms/appServicePlan': 'Resource'
   }
@@ -47,34 +50,61 @@ resource webApplication2 'Microsoft.Web/sites@2018-11-01' = {
   }
 }
 
-resource frontDoor1 'Microsoft.Network/frontDoors@2020-05-01' = {
-  name: frontdoorname
-  location: frontdoorlocation
+resource frontDoor 'Microsoft.Network/frontDoors@2020-05-01' = {
+  name: frontDoorName
+  location: frontDoorLocation
   properties: {
+    healthProbeSettings: [
+      {
+        name: loadBalancingSettingsName
+        properties: {
+          enabledState: 'Enabled'
+          healthProbeMethod: 'HEAD'
+          intervalInSeconds: 30
+          path: '/'
+          protocol: 'Https'
+        }
+      }
+    ]
+    loadBalancingSettings: [
+      {
+        name: healthProbe
+        properties: {
+          additionalLatencyMilliseconds: 4
+          sampleSize: 2
+          successfulSamplesRequired: 1
+        }
+      }
+    ]    
     backendPools: [
       {
-        name: 'ralphvl-test-webappfront2.azurefd.net'
+        name: frontDoorBackendPoolAppName
         properties: {
           backends: [
             {
-              address: 'ralphvl-webapp-1.azurewebsites.net'
-              privateLinkResourceId: null
-              privateLinkLocation: null
-              privateEndpointStatus: null
-              privateLinkApprovalMessage: null
+              address: webApplication1.properties.defaultHostName
               enabledState: 'Enabled'
               httpPort: 80
               httpsPort: 443
               priority: 1
               weight: 50
-              backendHostHeader: 'ralphvl-webapp-1.azurewebsites.net'
+              backendHostHeader: webApplication1.properties.defaultHostName
+            }
+            {
+              address: webApplication2.properties.defaultHostName
+              enabledState: 'Enabled'
+              httpPort: 80
+              httpsPort: 443
+              priority: 1
+              weight: 50
+              backendHostHeader: webApplication2.properties.defaultHostName
             }
           ]
-          healthProbeSettings: {
-            id: '/subscriptions/847facc0-8b90-4374-a58b-cc375b39646f/resourceGroups/ralphvl-dev-rg-cloudgv-01/providers/Microsoft.Network/frontdoors/ralphvl-frontdoor-1/healthProbeSettings/healthProbeSettings-1638437038422'
-          }
           loadBalancingSettings: {
-            id: '/subscriptions/847facc0-8b90-4374-a58b-cc375b39646f/resourceGroups/ralphvl-dev-rg-cloudgv-01/providers/Microsoft.Network/frontdoors/ralphvl-frontdoor-1/loadBalancingSettings/loadBalancingSettings-1638437038422'
+            id: resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', frontDoorName, healthProbe)
+          }
+          healthProbeSettings: {
+            id: resourceId('Microsoft.Network/frontDoors/healthProbeSettings', frontDoorName, loadBalancingSettingsName)
           }
         }
       }
@@ -84,44 +114,19 @@ resource frontDoor1 'Microsoft.Network/frontDoors@2020-05-01' = {
       sendRecvTimeoutSeconds: 30
     }
     enabledState: 'Enabled'
-    friendlyName: 'ralphvl-test-webappfront1-azurefd-net'
     frontendEndpoints: [
       {
-        name: 'ralphvl-test-webappfront1-azurefd-net'
+        name: 'frontendEndpoint1'
         properties: {
-          hostName: 'ralphvl-test-webappfront.azurefd.net'
+          hostName: '${frontDoorName}.azurefd.net'
           sessionAffinityEnabledState: 'Disabled'
           sessionAffinityTtlSeconds: 0
-          webApplicationFirewallPolicyLink: null
-        }
-        
-      }
-    ]
-    healthProbeSettings: [
-      {
-        name: 'healthProbeSettings-1638437038422'
-        properties: {
-          enabledState: 'Enabled'
-          healthProbeMethod: 'Head'
-          intervalInSeconds: 30
-          path: '/'
-          protocol: 'Https'
-        }
-      }
-    ]
-    loadBalancingSettings: [
-      {
-        name: 'loadBalancingSettings-1638437038422'
-        properties: {
-          additionalLatencyMilliseconds: 4
-          sampleSize: 2
-          successfulSamplesRequired: 0
-        }
+        } 
       }
     ]
     routingRules: [
       {
-        name: 'erbrtsfdbseadffdb'
+        name: 'RoutingRule1'
         properties: {
           acceptedProtocols: [
             'Http'
@@ -130,52 +135,21 @@ resource frontDoor1 'Microsoft.Network/frontDoors@2020-05-01' = {
           enabledState: 'Enabled'
           frontendEndpoints: [
             {
-              id: '/subscriptions/847facc0-8b90-4374-a58b-cc375b39646f/resourceGroups/ralphvl-dev-rg-cloudgv-01/providers/Microsoft.Network/frontdoors/ralphdoeteentest/frontendEndpoints/ralphdoeteentest-azurefd-net'
+              id: resourceId('Microsoft.Network/frontDoors/frontendEndpoints', frontDoorName, 'frontendEndpoint1')
             }
           ]
           patternsToMatch: [
-            '*'
+            '/*'
           ]
           routeConfiguration: {
             '@odata.type': '#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration'
             backendPool: {
-              id: 'string'
+              id: resourceId('Microsoft.Network/frontDoors/backendPools', frontDoorName, frontDoorBackendPoolAppName)
             }
-            cacheConfiguration: {
-              cacheDuration: 'string'
-              dynamicCompression: 'string'
-              queryParameters: 'string'
-              queryParameterStripDirective: 'string'
-            }
-            customForwardingPath: 'string'
-            forwardingProtocol: 'string'
           }
         }
       }
     ]
   }
 }
-
-resource applicationGatewayFirewall 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2020-11-01' = {
-  name: 'name'
-  location: resourceGroup().location
-  properties: {
-    policySettings: {
-      requestBodyCheck: true
-      maxRequestBodySizeInKb: 'maxRequestBodySizeInKb'
-      fileUploadLimitInMb: 'fileUploadLimitInMb'
-      state: 'Enabled'
-      mode: 'Detection'
-    }
-    managedRules: {
-      managedRuleSets: [
-        {
-          ruleSetType: 'ruleSetType'
-          ruleSetVersion: 'ruleSetVersion'
-        }
-      ]
-    }
-  }
-}
-
-
+output frontDoorURL string = '${frontDoor.name}.azurefd.net'
