@@ -1,0 +1,41 @@
+
+
+// Show logging for the last hour for all containers from pods that have "purchasing-app" in their name
+KubePodInventory
+| where Name contains "purchasing-app"
+| join(
+ContainerLog
+| where TimeGenerated > startofday(ago(1h))
+)
+on ContainerID
+| project TimeGenerated, Name, LogEntry
+
+// Query 2
+InsightsMetrics
+| where Name == "UtilizationPercentage"
+| summarize Usage=avg(Val)
+    by Computer
+| extend  Status = case(Usage > 90, "CRITICAL: CPU is higher than 90%",
+    Usage > 80, "WARNING: CPU usage is higher than 80%",
+    "OK"
+    )
+
+// Query 3
+VMBoundPort
+| where Port == 3389
+| distinct Computer, Port
+
+// Query 4
+AzureNetworkAnalytics_CL
+| where DestPort_d == 3389 and DestIP_s == "10.1.0.4"
+| project TimeGenerated, FlowType_s, DestIP_s, DestPort_d
+
+// Query 5
+KubePodInventory
+| where Name contains "purchasing-app"
+| join(
+KubeEvents 
+| where KubeEventType == "Warning" and ObjectKind == "Pod"
+)
+on Name
+| project TimeGenerated, FirstSeen, Name, Message
